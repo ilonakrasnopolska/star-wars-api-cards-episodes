@@ -39,9 +39,11 @@ function createParagraph(className, text) {
   return paragraph
 }
 
-function createImage(className) {
+function createImage(className, src, alt) {
   let image = document.createElement('img')
   image.classList.add(className)
+  image.src = src
+  image.alt = alt
   return image
 }
 

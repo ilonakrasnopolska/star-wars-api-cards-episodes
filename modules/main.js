@@ -25,27 +25,30 @@ function loadResource(src) {
 const appContainer = document.getElementById('app')
 const searchParams = new URLSearchParams(location.search)
 
-const episodeId = searchParams.get('')
-console.log(searchParams)
+const episodeId = searchParams.get('episodeId')
+console.log(episodeId)
 
 function renderPage (moduleName, apiUrl, css) {
+  console.log(`${moduleName} module`)
+  console.log(`${apiUrl} api link`)
+  console.log(`${css} css styles`)
   Promise.all([moduleName, apiUrl, css].map(src => loadResource(src)))
     .then(([pageModule, data]) => {
       appContainer.innerHTML = ''
-      appContainer.append(pageModule.render(data))
+      appContainer.append(pageModule.render(data.result))
     })
 }
 
 if (episodeId) {
   //load more info about product
   renderPage(
-    './episode-details.js',
-    `https://api.escuelajs.co/api/v1/products/${episodeId}`,
+    './visualPart/episode-details.js',
+    `https://swapi.tech/api/films/${episodeId}`,
     'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css'
   )
 } else {
   renderPage(
-    './episode-list.js',
+    './visualPart/episode-list.js',
     'https://swapi.tech/api/films/',
     'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css'
   )
