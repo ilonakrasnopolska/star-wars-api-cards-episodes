@@ -10,19 +10,25 @@ import {
 } from '../html-elements.js'
 
 //get array of images with link
-import {imgArrSW} from '/modules/components.js'
+import {getImageUrl} from '/modules/components.js'
 
-//create function for sorting data
-export function sortData(data) {
-  data.sort((a, b) => {
-    const episodeA = parseInt(a.properties.episode_id)
-    const episodeB = parseInt(b.properties.episode_id)
-    return episodeA - episodeB
+//create array for getting new array after sorting
+let episodeCards = []
+
+//create func for sorting cards
+function sortByEpisodeId(films) {
+  films.sort((a, b) => {
+    const episodeIdA =
+      parseInt(a.querySelector('.card-text').textContent.replace('Part ', ''));
+    const episodeIdB =
+      parseInt(b.querySelector('.card-text').textContent.replace('Part ', ''));
+    return episodeIdA - episodeIdB
   })
 }
 
 export function render(data) {
-  console.log(data)
+  //reset array of episode cards
+  episodeCards.length = 0
   //get main container of app
   const appContainer = document.getElementById('app')
   //create main subtitle
@@ -38,17 +44,12 @@ export function render(data) {
     'flex-wrap',
     'py-4'
   )
-  //current index of current img from imgArrSW
-  let index = 0;
-
-  //call func for sorting
-  sortData(data)
 
   for (const episode of data) {
     //create elements
     const episodeCard = createItem('card')
     const image = createImage('card-image-top',
-      `${imgArrSW[index]}`,
+      `${getImageUrl(episode.properties.episode_id)}`,
       `Episode ${episode.properties.episode_id}`)
 
     const cardBody = createDiv('card-body')
@@ -74,16 +75,25 @@ export function render(data) {
     title.textContent = `${episode.properties.title}`
     detailsButton.textContent = `More info about episode ${episode.properties.episode_id}`
 
-    //increase index
-    index++
-    if (index >= imgArrSW.length) {
-      index = 0 // Вернуться к началу массива, если достигнут конец
-    }
+    //add event listener's
+    // detailsButton.addEventListener('click', (e) => {
+    //   e.preventDefault()
+    // })
+
 
     //append all
     episodeCard.append(image, cardBody)
     cardBody.append(episodeNumber, title, detailsButton)
 
+    //add card to array
+    episodeCards.push(episodeCard)
+  }
+
+  // sort cards
+  sortByEpisodeId(episodeCards)
+
+  // add to container cards
+  for (const episodeCard of episodeCards) {
     container.append(episodeCard)
   }
   return container
