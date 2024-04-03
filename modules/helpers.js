@@ -1,3 +1,16 @@
+import {renderPageByClick} from '/modules/serverApi.js'
+
+//get container
+const appContainer = document.getElementById('app')
+
+//create array for getting new array after sorting cards
+let episodeCards = []
+
+//get url
+const searchParams = new URLSearchParams(location.search)
+//get id from url
+const episodeId = searchParams.get('episodeId')
+
 //for changing id to the right id
 const episodeMap = {
   1: 4, // IV
@@ -40,9 +53,41 @@ function getImageUrl(episodeId) {
   }
 }
 
+//create func for sorting cards
+function sortByEpisodeId(films) {
+  films.sort((a, b) => {
+    const episodeIdA =
+      parseInt(a.querySelector('.card-text').textContent.replace('Part ', ''));
+    const episodeIdB =
+      parseInt(b.querySelector('.card-text').textContent.replace('Part ', ''));
+    return episodeIdA - episodeIdB
+  })
+}
+
+//create event listeners for button's
+function handleClickToBtn(button) {
+  button.addEventListener('click', (e) => {
+    e.preventDefault()
+    //get path to new page from button
+    const href = e.target.getAttribute('href')
+    // change URL current page without reboot
+    history.pushState(null, '', href)
+
+    // Вызываем логику перерисовки страницы
+    renderPageByClick()
+
+    console.log(href)
+  })
+}
+
 export {
+  appContainer,
+  episodeCards,
+  episodeId,
   episodeMap,
   imgArrSW,
   getHomeURL,
-  getImageUrl
+  getImageUrl,
+  sortByEpisodeId,
+  handleClickToBtn
 }

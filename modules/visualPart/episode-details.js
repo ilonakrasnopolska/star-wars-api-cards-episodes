@@ -8,10 +8,10 @@ import {
 } from '../html-elements.js'
 
 //get array of images with link
-import {getHomeURL, getImageUrl} from '/modules/components.js'
+import {getHomeURL, getImageUrl, handleClickToBtn} from '/modules/helpers.js'
 
 //get func for getting data from API
-import {getDataFromEpisode} from "/modules/serverApi.js"
+import {getDataFromEpisodeWithCache} from "/modules/serverApi.js"
 
 //create function of creating episode card
 function createEpisodeCard(data, container) {
@@ -29,7 +29,7 @@ function createEpisodeCard(data, container) {
   container.classList.add('py-4')
   episodeCard.classList.add('my-2', 'card')
   cardBody.classList.add('d-flex', 'justify-content-between', 'flex-column',)
-  backButton.classList.add('btn-primary')
+  backButton.classList.add('btn-outline-secondary')
   backButton.href = getHomeURL()
   episodeCard.style.width = '40%'
 
@@ -38,52 +38,63 @@ function createEpisodeCard(data, container) {
   description.textContent = `${data.properties.opening_crawl}`
   backButton.textContent = 'Back to episodes'
 
+  //add event listener to button
+  handleClickToBtn(backButton)
+
   cardBody.append(title, description, backButton)
   episodeCard.append(image, cardBody)
   container.append(episodeCard)
 }
 
 //create function of creating list of components from episode
-function createDetailsList(subtitle, data, descrArray, listBox) {
-  const list = createList('card-body')
+function createDetailsList(subtitle, data, listBox) {
+  const wrapper = createDiv('card-body')
+  const list = createList('card-list')
   const title = createTitle('h2', 'card-title', subtitle)
 
-  for (const item of descrArray) {
-    console.log(item)
-    let li = createItem()
+  for (const item of data) {
+    let li = createItem('card-item')
     li.textContent = item
     list.append(li)
   }
 
-  listBox.append(title, list)
+  wrapper.append(title, list)
+  listBox.append(wrapper)
 }
 
-async function renderDetailsList(data, container) {
-  const [planets, species, starships] = await Promise.all([
-    getDataFromEpisode(data.properties.planets),
-    getDataFromEpisode(data.properties.species),
-    getDataFromEpisode(data.properties.starships)
+//load episode details
+function loadEpisodeData(data, container, listBox) {
+  Promise.all([
+    getDataFromEpisodeWithCache(data.properties.planets),
+    getDataFromEpisodeWithCache(data.properties.species),
+    getDataFromEpisodeWithCache(data.properties.starships)
   ])
+    .then(([planets, species, starships]) => {
+      const result = {
+        planets,
+        species,
+        starships
+      }
 
-  const result = {
-    planets,
-    species,
-    starships
-  }
+      const requests = Object.keys(result).map(key => {
+        return createDetailsList(key, result[key], listBox)
+      })
 
-  const listBox = createDiv('card')
-  listBox.style.width = '40%'
-
-  for (let key in result) {
-    createDetailsList(key, data, result[key], listBox);
-  }
-
-  container.append(listBox)
+      Promise.all(requests).then(() => {
+        //create episode card
+        createEpisodeCard(data, container)
+        container.append(listBox)
+      })
+    })
+    .catch(error => {
+      console.error("Error loading content:", error)
+    })
 }
 
+//render page
 export function render(data) {
-  console.log(`${data.properties.episode_id} what i get id of episode`)
   const container = createDiv('container')
+  const listBox = createDiv('card')
 
   //styles
   container.classList.add(
@@ -91,11 +102,11 @@ export function render(data) {
     'justify-content-between',
     'flex-wrap'
   )
+  listBox.classList.add('p-4')
+  listBox.style.width = '40%'
 
-  //create planets list
-  renderDetailsList(data, container)
-  //create episode card
-  createEpisodeCard(data, container)
+  //load content
+  loadEpisodeData(data, container, listBox)
 
   return container
 }
