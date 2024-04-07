@@ -9,10 +9,21 @@
       background-image:
         url(https://st2.depositphotos.com/3031831/5365/i/600/depositphotos_53655241-stock-photo-black-space-with-many-stars.jpg);
     }
+    #loading-spinner {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
   </style>
 </head>
 <body>
   <div id="app" class="container"></div>
+  <div id="loading-spinner">
+    <div class="spinner-border text-white" style="width: 5rem; height: 5rem;" role="status">
+      <span class="visually-hidden"></span>
+    </div>
+  </div>
   <script type="module" src="./modules/main.js"></script>
 </body>
 </html>

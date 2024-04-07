@@ -1,10 +1,12 @@
 //get load resource function
-import {renderPageByClick} from './serverApi.js'
+import {lazyLoadById} from './serverApi.js'
+
+lazyLoadById()
 
 window.addEventListener('popstate', () => {
-  renderPageByClick()
+  lazyLoadById()
 })
 
-renderPageByClick()
+
 
 

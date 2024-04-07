@@ -37,7 +37,7 @@ function createCards(data) {
     episodeNumber.style.fontSize = '20px'
     title.style.fontSize = '30px'
     detailsButton.classList.add('btn-outline-secondary')
-    detailsButton.href = `?episodeId=${episode.properties.episode_id}/`
+    detailsButton.href = `?episodeId=${episode.properties.episode_id}`
 
     //add text content
     episodeNumber.textContent = `Part ${episode.properties.episode_id}:`

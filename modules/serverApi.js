@@ -1,5 +1,5 @@
 //empty obj for saving old request data from server
-import {appContainer, episodeId, episodeMap} from "./helpers.js";
+import {appContainer, episodeMap} from "./helpers.js";
 
 const cache = {}
 
@@ -29,40 +29,49 @@ function loadResource(src) {
   return fetch(src).then(res => res.json())
 }
 
-function renderPage (moduleName, apiUrl, css) {
+function lazyLoad (moduleName, apiUrl, css) {
+  // show loading spinner
+  const loadingSpinner = document.getElementById('loading-spinner')
+  loadingSpinner.classList.add('d-flex', 'justify-content-center')
+  loadingSpinner.style.display = 'flex'
   Promise.all([moduleName, apiUrl, css].map(src => loadResource(src)))
-    .then(([pageModule, data]) => {
+    .then(async ([pageModule, data]) => {
 
       appContainer.innerHTML = ''
-      appContainer.append(pageModule.render(data.result))
-      console.log(data.result)
-    })
+      appContainer.append(await pageModule.render(data.result))
+    }).finally(() => {
+    // hidden spinner
+    loadingSpinner.classList.remove('d-flex', 'justify-content-center')
+    loadingSpinner.style.display = 'none'
+    }
+  )
 }
 
-const renderPageByClick = () => {
-  console.log(episodeId)
+const lazyLoadById = () => {
+//get url
+  let searchParams = new URLSearchParams(window.location.search)
+//get id from url
+  let episodeId = searchParams.get('episodeId')
   if (episodeId) {
     //try to find the righter id
     const mappedEpisodeId = episodeMap[parseInt(episodeId)]
-    console.log(`${mappedEpisodeId} id what i try to get`)
     if (mappedEpisodeId) {
       //load more info about product
-      renderPage(
+      lazyLoad(
         './visualPart/episode-details.js',
         `https://swapi.tech/api/films/${mappedEpisodeId}`,
         'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css'
       )
-    } else {
-      console.error(`No mapped episode found for episodeId: ${episodeId}`)
     }
   } else {
-    renderPage(
+    lazyLoad(
       './visualPart/episode-list.js',
       'https://swapi.tech/api/films/',
       'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css'
     )
   }
-};
+}
+
 
 //function send res for getting details of episode , like planets
 const getDataFromEpisode = async (obj) => {
@@ -83,7 +92,9 @@ const getDataFromEpisode = async (obj) => {
 //function with conditions if we got data not send request again
 async function getDataFromEpisodeWithCache(objName) {
   if (cache[objName]) {
-    return cache[objName]
+    const data = cache[objName]
+    delete cache[objName] // Удаляем данные из кэша после использования
+    return data
   } else {
     let data = await getDataFromEpisode(objName)
     cache[objName] = data
@@ -91,4 +102,4 @@ async function getDataFromEpisodeWithCache(objName) {
   }
 }
 
-export {loadResource, getDataFromEpisodeWithCache, renderPage, renderPageByClick}
+export {loadResource, getDataFromEpisodeWithCache, lazyLoad, lazyLoadById}

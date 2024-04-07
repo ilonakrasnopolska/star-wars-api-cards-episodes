@@ -1,15 +1,10 @@
-import {renderPageByClick} from '/modules/serverApi.js'
+import {lazyLoadById} from '/modules/serverApi.js'
 
 //get container
 const appContainer = document.getElementById('app')
 
 //create array for getting new array after sorting cards
 let episodeCards = []
-
-//get url
-const searchParams = new URLSearchParams(location.search)
-//get id from url
-const episodeId = searchParams.get('episodeId')
 
 //for changing id to the right id
 const episodeMap = {
@@ -74,16 +69,13 @@ function handleClickToBtn(button) {
     history.pushState(null, '', href)
 
     // Вызываем логику перерисовки страницы
-    renderPageByClick()
-
-    console.log(href)
+    lazyLoadById()
   })
 }
 
 export {
   appContainer,
   episodeCards,
-  episodeId,
   episodeMap,
   imgArrSW,
   getHomeURL,
