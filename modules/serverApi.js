@@ -39,15 +39,14 @@ function lazyLoad (moduleName, apiUrl, css) {
 
       appContainer.innerHTML = ''
       appContainer.append(await pageModule.render(data.result))
-    }).finally(() => {
-    // hidden spinner
-    loadingSpinner.classList.remove('d-flex', 'justify-content-center')
-    loadingSpinner.style.display = 'none'
-    }
-  )
+      // Hide the loading spinner
+      loadingSpinner.classList.remove('d-flex', 'justify-content-center')
+      loadingSpinner.style.display = 'none'
+    })
 }
 
 const lazyLoadById = () => {
+  appContainer.innerHTML = ''
 //get url
   let searchParams = new URLSearchParams(window.location.search)
 //get id from url

@@ -63,36 +63,34 @@ function createDetailsList(subtitle, data, listBox) {
 }
 
 //load episode details
-function loadEpisodeData(data, container, listBox) {
-  Promise.all([
-    getDataFromEpisodeWithCache(data.properties.planets),
-    getDataFromEpisodeWithCache(data.properties.species),
-    getDataFromEpisodeWithCache(data.properties.starships)
-  ])
-    .then(([planets, species, starships]) => {
-      const result = {
-        planets,
-        species,
-        starships
-      }
+async function loadEpisodeData(data, container, listBox) {
+  try {
+    const planets = await getDataFromEpisodeWithCache(data.properties.planets)
+    const species = await getDataFromEpisodeWithCache(data.properties.species)
+    const starships = await getDataFromEpisodeWithCache(data.properties.starships)
 
-      const requests = Object.keys(result).map(key => {
-        return createDetailsList(key, result[key], listBox)
-      })
+    const result = {
+      planets,
+      species,
+      starships
+    }
 
-      Promise.all(requests).then(() => {
-        //create episode card
-        createEpisodeCard(data, container)
-        container.append(listBox)
-      })
+    const requests = Object.keys(result).map(key => {
+      return createDetailsList(key, result[key], listBox)
     })
-    .catch(error => {
-      console.error("Error loading content:", error)
-    })
+
+    await Promise.all(requests)
+
+    //create episode card
+    createEpisodeCard(data, container)
+    container.append(listBox)
+  } catch (error) {
+    console.error("Error loading content:", error)
+  }
 }
 
 //render page
-export function render(data) {
+export async function render(data) {
   const container = createDiv('container')
   const listBox = createDiv('card')
 
@@ -106,7 +104,7 @@ export function render(data) {
   listBox.style.width = '40%'
 
   //load content
-  loadEpisodeData(data, container, listBox)
+  await loadEpisodeData(data, container, listBox)
 
   return container
 }
